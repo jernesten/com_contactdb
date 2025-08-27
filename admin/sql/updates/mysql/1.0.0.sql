@@ -1,0 +1,2 @@
+-- Actualizaciones para la versión 1.0.0 de ContactDB
+-- Este archivo está intencionalmente vacío ya que es la versión inicial

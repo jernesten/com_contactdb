@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="4.0" method="upgrade">
+    <name>ContactDB</name>
+    <author>Ernesto González</author>
+    <creationDate>2025</creationDate>
+    <copyright>Derechos reservados</copyright>
+    <license>GNU GPL v2 o posterior</license>
+    <authorEmail></authorEmail>
+    <authorUrl>github.com/jernesten</authorUrl>
+    <version>1.0.0</version>
+    <description>Componente para almacenar mensajes de contacto en base de datos</description>
+    
+    <scriptfile>script.php</scriptfile>
+    
+    <!-- Archivos del componente principal -->
+    <files>
+        <folder>site</folder>
+        <folder>admin</folder>
+        <filename>contactdb.php</filename>
+    </files>
+    
+    <!-- Archivos de administración -->
+    <administration>
+        <menu>ContactDB</menu>
+        <files folder="admin">
+            <folder>controllers</folder>
+            <folder>models</folder>
+            <folder>sql</folder>
+            <folder>tables</folder>
+            <folder>views</folder>
+            <filename>controller.php</filename>
+            <filename>contactdb.php</filename>
+            <filename>config.xml</filename>
+        </files>
+    </administration>
+    
+    <!-- Scripts de instalación -->
+<!-- new script demand
+
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+        </sql>
+    </install>
+    
+    <uninstall>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+        </sql>
+    </uninstall>
+
+     <update>
+        <schemas>
+            <schemapath type="mysql">sql/updates/mysql</schemapath>
+        </schemas>
+    </update>
+-->
+    
+    
+    <!-- Instalar el módulo automáticamente -->
+    <install>
+        <files folder="modules/mod_contactdb">
+            <filename>mod_contactdb.xml</filename>
+            <filename>mod_contactdb.php</filename>
+            <filename>helper.php</filename>
+            <folder>tmpl</folder>
+            <folder>assets</folder>
+            <folder>language</folder>
+        </files>
+    </install>
+</extension>
+    

@@ -35,7 +35,7 @@
     </administration>
     
     <!-- Scripts de instalación -->
-<!-- new script demand
+
 
     <install>
         <sql>
@@ -54,7 +54,6 @@
             <schemapath type="mysql">sql/updates/mysql</schemapath>
         </schemas>
     </update>
--->
     
     
     <!-- Instalar el módulo automáticamente -->

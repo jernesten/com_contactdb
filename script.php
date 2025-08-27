@@ -5,20 +5,7 @@ class Com_ContactDBInstallerScript
 {
     public function install($parent)
     {
-        // Crear la tabla manualmente
-        if ($this->createTable()) {
-            echo '<p>✓ Tabla de mensajes creada correctamente.</p>';
-        } else {
-            echo '<p>✗ Error al crear la tabla de mensajes.</p>';
-        }
-        
-        // Instalar el módulo
-        if ($this->installModule()) {
-            echo '<p>✓ Módulo de contacto instalado.</p>';
-        } else {
-            echo '<p>✗ Error al instalar el módulo.</p>';
-        }
-        
+        $this->installModule();
         echo '<p>Componente ContactDB instalado correctamente.</p>';
         echo '<p>El módulo de formulario de contacto ha sido instalado y puede ser publicado en cualquier posición.</p>';
         return true;
@@ -26,20 +13,7 @@ class Com_ContactDBInstallerScript
     
     public function uninstall($parent)
     {
-        // Eliminar la tabla manualmente
-        if ($this->dropTable()) {
-            echo '<p>✓ Tabla de mensajes eliminada correctamente.</p>';
-        } else {
-            echo '<p>✗ Error al eliminar la tabla de mensajes.</p>';
-        }
-        
-        // Desinstalar el módulo
-        if ($this->uninstallModule()) {
-            echo '<p>✓ Módulo de contacto desinstalado.</p>';
-        } else {
-            echo '<p>✗ Error al desinstalar el módulo.</p>';
-        }
-        
+        $this->uninstallModule();
         echo '<p>Componente ContactDB desinstalado correctamente.</p>';
         return true;
     }
@@ -67,81 +41,33 @@ class Com_ContactDBInstallerScript
         return true;
     }
     
-    private function createTable()
-    {
-        try {
-            $db = JFactory::getDbo();
-            
-            // Crear tabla de mensajes
-            $query = "CREATE TABLE IF NOT EXISTS `#__contactdb_messages` (
-                `id` int(11) NOT NULL AUTO_INCREMENT,
-                `name` varchar(255) NOT NULL,
-                `email` varchar(255) NOT NULL,
-                `subject` varchar(255) NOT NULL,
-                `message` text NOT NULL,
-                `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                `answered` tinyint(1) NOT NULL DEFAULT 0,
-                `answer` text,
-                `answered_date` datetime DEFAULT NULL,
-                `published` tinyint(1) NOT NULL DEFAULT 1,
-                PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-            
-            $db->setQuery($query);
-            $db->execute();
-            
-            return true;
-        } catch (Exception $e) {
-            JFactory::getApplication()->enqueueMessage('Error creando tabla: ' . $e->getMessage(), 'error');
-            return false;
-        }
-    }
-    
-    private function dropTable()
-    {
-        try {
-            $db = JFactory::getDbo();
-            
-            // Eliminar tabla de mensajes
-            $query = "DROP TABLE IF EXISTS `#__contactdb_messages`";
-            
-            $db->setQuery($query);
-            $db->execute();
-            
-            return true;
-        } catch (Exception $e) {
-            JFactory::getApplication()->enqueueMessage('Error eliminando tabla: ' . $e->getMessage(), 'error');
-            return false;
-        }
-    }
-    
     private function installModule()
     {
-        try {
-            $db = JFactory::getDbo();
+        $db = JFactory::getDbo();
+        
+        // Verificar si el módulo ya existe
+        $query = $db->getQuery(true)
+            ->select('id')
+            ->from('#__modules')
+            ->where('module = ' . $db->quote('mod_contactdb'));
+        $db->setQuery($query);
+        
+        if (!$db->loadResult()) {
+            $module = (object) [
+                'title' => 'Formulario de Contacto',
+                'note' => '',
+                'content' => '',
+                'position' => '',
+                'module' => 'mod_contactdb',
+                'access' => 1,
+                'showtitle' => 1,
+                'params' => '{"show_title":"1","pretext":"Póngase en contacto con nosotros","moduleclass_sfx":""}',
+                'client_id' => 0,
+                'language' => '*',
+                'published' => 0
+            ];
             
-            // Verificar si el módulo ya existe
-            $query = $db->getQuery(true)
-                ->select('id')
-                ->from('#__modules')
-                ->where('module = ' . $db->quote('mod_contactdb'));
-            $db->setQuery($query);
-            
-            if (!$db->loadResult()) {
-                $module = (object) [
-                    'title' => 'Formulario de Contacto',
-                    'note' => '',
-                    'content' => '',
-                    'position' => '',
-                    'module' => 'mod_contactdb',
-                    'access' => 1,
-                    'showtitle' => 1,
-                    'params' => '{"show_title":"1","pretext":"Póngase en contacto con nosotros","moduleclass_sfx":""}',
-                    'client_id' => 0,
-                    'language' => '*',
-                    'published' => 0
-                ];
-                
+            try {
                 $db->insertObject('#__modules', $module);
                 $moduleId = $db->insertid();
                 
@@ -151,19 +77,21 @@ class Com_ContactDBInstallerScript
                     'menuid' => 0
                 ];
                 $db->insertObject('#__modules_menu', $assignment);
+                
+                return true;
+            } catch (Exception $e) {
+                JFactory::getApplication()->enqueueMessage('Error instalando módulo: ' . $e->getMessage(), 'error');
+                return false;
             }
-            return true;
-        } catch (Exception $e) {
-            JFactory::getApplication()->enqueueMessage('Error instalando módulo: ' . $e->getMessage(), 'error');
-            return false;
         }
+        return true;
     }
     
     private function uninstallModule()
     {
+        $db = JFactory::getDbo();
+        
         try {
-            $db = JFactory::getDbo();
-            
             // Eliminar módulos
             $query = $db->getQuery(true)
                 ->delete('#__modules')
@@ -180,9 +108,9 @@ class Com_ContactDBInstallerScript
     
     private function createAdminMenu()
     {
+        $db = JFactory::getDbo();
+        
         try {
-            $db = JFactory::getDbo();
-            
             // Verificar si el menú ya existe
             $query = $db->getQuery(true)
                 ->select('id')

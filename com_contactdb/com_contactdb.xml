@@ -11,29 +11,34 @@
 
     <scriptfile>script.php</scriptfile>
 
-    <!-- Archivos del componente principal -->
     <files>
-        <folder>site</folder>
-        <folder>admin</folder>
         <filename>com_contactdb.php</filename>
+    </files>
+
+    <!-- Archivos del frontend -->
+    <files folder="site">
+        <filename>controller.php</filename>
+        <folder>controllers</folder>
+        <folder>models</folder>
+        <folder>views</folder>
     </files>
 
     <!-- Archivos de administración -->
     <administration>
         <menu>ContactDB</menu>
         <files folder="admin">
+            <filename>contactdb.php</filename>
+            <filename>controller.php</filename>
+            <filename>config.xml</filename>
             <folder>controllers</folder>
             <folder>models</folder>
             <folder>sql</folder>
             <folder>tables</folder>
             <folder>views</folder>
-            <filename>controller.php</filename>
-            <filename>contactdb.php</filename>
-            <filename>config.xml</filename>
         </files>
     </administration>
 
-    <!-- Scripts de instalación combinados -->
+    <!-- Scripts de instalación -->
     <install>
         <sql>
             <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>

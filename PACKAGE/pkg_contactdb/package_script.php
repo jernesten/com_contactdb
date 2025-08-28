@@ -1,64 +1,61 @@
 <?php
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
+use Joomla\CMS\Installer\InstallerAdapter;
+use Joomla\CMS\Installer\Installer;
+use Joomla\Database\DatabaseDriver;
+
 class Pkg_ContactDBInstallerScript
 {
     public function install($parent)
     {
-        echo '<p>Package ContactDB instalado correctamente.</p>';
-        echo '<p>El package incluye el componente ContactDB y el módulo de formulario.</p>';
+        echo '<p>✓ Package ContactDB instalado correctamente.</p>';
+        echo '<p>Incluye el componente ContactDB y el módulo de formulario.</p>';
         return true;
     }
-    
+
     public function uninstall($parent)
     {
-        // Obtener la base de datos
-        $db = JFactory::getDbo();
-        
+        $db = Factory::getDbo();
         echo '<p>Iniciando desinstalación del package ContactDB...</p>';
-        
-        // Desinstalar el componente si existe
+
         $this->uninstallExtension('component', 'com_contactdb');
-        
-        // Desinstalar el módulo si existe
         $this->uninstallExtension('module', 'mod_contactdb');
-        
-        // Limpiar cualquier menú administrativo residual
         $this->cleanAdminMenu();
-        
-        echo '<p>Package ContactDB desinstalado correctamente.</p>';
+
+        echo '<p>✓ Package ContactDB desinstalado correctamente.</p>';
         return true;
     }
-    
+
     public function update($parent)
     {
-        echo '<p>Package ContactDB actualizado a la versión ' . $parent->get('manifest')->version . '.</p>';
+        echo '<p>✓ Package ContactDB actualizado a la versión ' . $parent->get('manifest')->version . '.</p>';
         return true;
     }
-    
+
     public function preflight($type, $parent)
     {
-        if (version_compare(JVERSION, '3.8.0', 'lt')) {
-            Jerror::raiseWarning(null, 'Este package requiere Joomla 3.8 o superior');
+        if (version_compare(JVERSION, '3.8.0', '<')) {
+            Factory::getApplication()->enqueueMessage('Este package requiere Joomla 3.8 o superior', 'warning');
             return false;
         }
         return true;
     }
-    
+
     public function postflight($type, $parent)
     {
-        if ($type == 'install') {
-            echo '<p>Package instalado completamente. Ahora puedes publicar el módulo desde el Gestor de Módulos.</p>';
+        if ($type === 'install') {
+            echo '<p>✓ Package instalado completamente. Puedes publicar el módulo desde el Gestor de Módulos.</p>';
         }
         return true;
     }
-    
+
     private function uninstallExtension($type, $element)
     {
-        $db = JFactory::getDbo();
-        
+        $db = Factory::getDbo();
+
         try {
-            // Buscar la extensión
             $query = $db->getQuery(true)
                 ->select('extension_id')
                 ->from('#__extensions')
@@ -66,17 +63,16 @@ class Pkg_ContactDBInstallerScript
                 ->where('element = ' . $db->quote($element));
             $db->setQuery($query);
             $extensionId = $db->loadResult();
-            
+
             if ($extensionId) {
-                $installer = new JInstaller();
+                $installer = new Installer();
                 $result = $installer->uninstall($type, $extensionId);
-                
+
                 if ($result) {
                     echo '<p>✓ ' . ucfirst($type) . ' ' . $element . ' desinstalado correctamente.</p>';
                     return true;
                 } else {
                     echo '<p>✗ Error desinstalando ' . $element . '. Intentando limpieza manual...</p>';
-                    // Limpieza manual de extensiones residuales
                     $this->cleanExtensionResidues($type, $element);
                     return false;
                 }
@@ -89,20 +85,19 @@ class Pkg_ContactDBInstallerScript
             return false;
         }
     }
-    
+
     private function cleanExtensionResidues($type, $element)
     {
-        $db = JFactory::getDbo();
-        
+        $db = Factory::getDbo();
+
         try {
-            // Eliminar registro de extensión si existe
             $query = $db->getQuery(true)
                 ->delete('#__extensions')
                 ->where('type = ' . $db->quote($type))
                 ->where('element = ' . $db->quote($element));
             $db->setQuery($query);
             $db->execute();
-            
+
             echo '<p>✓ Registros residuales de ' . $element . ' eliminados.</p>';
             return true;
         } catch (Exception $e) {
@@ -110,13 +105,12 @@ class Pkg_ContactDBInstallerScript
             return false;
         }
     }
-    
+
     private function cleanAdminMenu()
     {
-        $db = JFactory::getDbo();
-        
+        $db = Factory::getDbo();
+
         try {
-            // Eliminar menú administrativo del componente
             $query = $db->getQuery(true)
                 ->delete('#__menu')
                 ->where('title = ' . $db->quote('ContactDB'))
@@ -124,7 +118,7 @@ class Pkg_ContactDBInstallerScript
                 ->where('link LIKE ' . $db->quote('%option=com_contactdb%'));
             $db->setQuery($query);
             $db->execute();
-            
+
             echo '<p>✓ Menú administrativo eliminado.</p>';
             return true;
         } catch (Exception $e) {
@@ -133,3 +127,4 @@ class Pkg_ContactDBInstallerScript
         }
     }
 }
+

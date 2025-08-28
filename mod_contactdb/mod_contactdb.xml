@@ -5,7 +5,6 @@
     <creationDate>2025</creationDate>
     <copyright>Derechos reservados</copyright>
     <license>GNU GPL v2 o posterior</license>
-    <authorEmail></authorEmail>
     <authorUrl>github.com/jernesten</authorUrl>
     <version>1.0.0</version>
     <description>Módulo para mostrar formulario de contacto que guarda en base de datos</description>

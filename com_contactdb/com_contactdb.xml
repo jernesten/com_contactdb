@@ -5,20 +5,19 @@
     <creationDate>2025</creationDate>
     <copyright>Derechos reservados</copyright>
     <license>GNU GPL v2 o posterior</license>
-    <authorEmail></authorEmail>
     <authorUrl>github.com/jernesten</authorUrl>
     <version>1.0.0</version>
     <description>Componente para almacenar mensajes de contacto en base de datos</description>
-    
+
     <scriptfile>script.php</scriptfile>
-    
+
     <!-- Archivos del componente principal -->
     <files>
         <folder>site</folder>
         <folder>admin</folder>
         <filename>contactdb.php</filename>
     </files>
-    
+
     <!-- Archivos de administración -->
     <administration>
         <menu>ContactDB</menu>
@@ -33,31 +32,12 @@
             <filename>config.xml</filename>
         </files>
     </administration>
-    
-    <!-- Scripts de instalación -->
 
-
+    <!-- Scripts de instalación combinados -->
     <install>
         <sql>
             <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
         </sql>
-    </install>
-    
-    <uninstall>
-        <sql>
-            <file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
-        </sql>
-    </uninstall>
-
-     <update>
-        <schemas>
-            <schemapath type="mysql">sql/updates/mysql</schemapath>
-        </schemas>
-    </update>
-    
-    
-    <!-- Instalar el módulo automáticamente -->
-    <install>
         <files folder="modules/mod_contactdb">
             <filename>mod_contactdb.xml</filename>
             <filename>mod_contactdb.php</filename>
@@ -67,5 +47,17 @@
             <folder>language</folder>
         </files>
     </install>
+
+    <uninstall>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+        </sql>
+    </uninstall>
+
+    <update>
+        <schemas>
+            <schemapath type="mysql">sql/updates/mysql</schemapath>
+        </schemas>
+    </update>
 </extension>
-    
+

@@ -16,6 +16,5 @@
         <file type="component" id="com_contactdb">com_contactdb.zip</file>
         <file type="module" id="mod_contactdb" client="site">mod_contactdb.zip</file>
     </files>
-    
-    <scriptfile>package_script.php</scriptfile>
+
 </extension>

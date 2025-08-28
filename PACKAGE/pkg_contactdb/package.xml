@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="package" version="4.0" method="upgrade">
     <name>ContactDB Package</name>
+    <packagename>contactdb</packagename>
     <author>Ernesto González</author>
     <creationDate>2025-08-28</creationDate>
     <copyright>Derechos reservados</copyright>

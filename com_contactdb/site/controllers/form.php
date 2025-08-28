@@ -8,6 +8,7 @@ use Joomla\CMS\Router\Route;
 
 class ContactDBControllerForm extends FormController
 {
+    // EL MÉTODO DEBE LLAMARSE EXACTAMENTE "save"
     public function save($key = null, $urlVar = null)
     {
         // Check for request forgeries.

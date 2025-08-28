@@ -5,15 +5,22 @@ class Com_ContactDBInstallerScript
 {
     public function install($parent)
     {
-        $this->installModule();
+        // Crear la tabla manualmente
+        if ($this->createTable()) {
+            echo '<p>✓ Tabla de mensajes creada correctamente.</p>';
+        }
+        
         echo '<p>Componente ContactDB instalado correctamente.</p>';
-        echo '<p>El módulo de formulario de contacto ha sido instalado y puede ser publicado en cualquier posición.</p>';
         return true;
     }
     
     public function uninstall($parent)
     {
-        $this->uninstallModule();
+        // Eliminar la tabla manualmente
+        if ($this->dropTable()) {
+            echo '<p>✓ Tabla de mensajes eliminada correctamente.</p>';
+        }
+        
         echo '<p>Componente ContactDB desinstalado correctamente.</p>';
         return true;
     }
@@ -33,130 +40,48 @@ class Com_ContactDBInstallerScript
         return true;
     }
     
-    public function postflight($type, $parent)
+    private function createTable()
     {
-        if ($type == 'install') {
-            $this->createAdminMenu();
-        }
-        return true;
-    }
-    
-    private function installModule()
-    {
-        $db = JFactory::getDbo();
-        
-        // Verificar si el módulo ya existe
-        $query = $db->getQuery(true)
-            ->select('id')
-            ->from('#__modules')
-            ->where('module = ' . $db->quote('mod_contactdb'));
-        $db->setQuery($query);
-        
-        if (!$db->loadResult()) {
-            $module = (object) [
-                'title' => 'Formulario de Contacto',
-                'note' => '',
-                'content' => '',
-                'position' => '',
-                'module' => 'mod_contactdb',
-                'access' => 1,
-                'showtitle' => 1,
-                'params' => '{"show_title":"1","pretext":"Póngase en contacto con nosotros","moduleclass_sfx":""}',
-                'client_id' => 0,
-                'language' => '*',
-                'published' => 0
-            ];
-            
-            try {
-                $db->insertObject('#__modules', $module);
-                $moduleId = $db->insertid();
-                
-                // Asignar a todas las páginas
-                $assignment = (object) [
-                    'moduleid' => $moduleId,
-                    'menuid' => 0
-                ];
-                $db->insertObject('#__modules_menu', $assignment);
-                
-                return true;
-            } catch (Exception $e) {
-                JFactory::getApplication()->enqueueMessage('Error instalando módulo: ' . $e->getMessage(), 'error');
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    private function uninstallModule()
-    {
-        $db = JFactory::getDbo();
-        
         try {
-            // Eliminar módulos
-            $query = $db->getQuery(true)
-                ->delete('#__modules')
-                ->where('module = ' . $db->quote('mod_contactdb'));
+            $db = JFactory::getDbo();
+            
+            $query = "CREATE TABLE IF NOT EXISTS `#__contactdb_messages` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `name` varchar(255) NOT NULL,
+                `email` varchar(255) NOT NULL,
+                `subject` varchar(255) NOT NULL,
+                `message` text NOT NULL,
+                `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `answered` tinyint(1) NOT NULL DEFAULT 0,
+                `answer` text,
+                `answered_date` datetime DEFAULT NULL,
+                `published` tinyint(1) NOT NULL DEFAULT 1,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+            
             $db->setQuery($query);
             $db->execute();
             
             return true;
         } catch (Exception $e) {
-            JFactory::getApplication()->enqueueMessage('Error desinstalando módulo: ' . $e->getMessage(), 'error');
+            JFactory::getApplication()->enqueueMessage('Error creando tabla: ' . $e->getMessage(), 'error');
             return false;
         }
     }
     
-    private function createAdminMenu()
+    private function dropTable()
     {
-        $db = JFactory::getDbo();
-        
         try {
-            // Verificar si el menú ya existe
-            $query = $db->getQuery(true)
-                ->select('id')
-                ->from('#__menu')
-                ->where('title = ' . $db->quote('ContactDB'))
-                ->where('client_id = 1');
-            $db->setQuery($query);
+            $db = JFactory::getDbo();
             
-            if (!$db->loadResult()) {
-                $componentId = $this->getComponentId();
-                
-                if ($componentId) {
-                    $menu = (object) [
-                        'menutype' => 'main',
-                        'title' => 'ContactDB',
-                        'alias' => 'contactdb',
-                        'path' => 'contactdb',
-                        'link' => 'index.php?option=com_contactdb',
-                        'type' => 'component',
-                        'published' => 1,
-                        'parent_id' => 1,
-                        'component_id' => $componentId,
-                        'access' => 1,
-                        'client_id' => 1,
-                        'params' => '{}'
-                    ];
-                    
-                    $db->insertObject('#__menu', $menu);
-                }
-            }
+            $query = "DROP TABLE IF EXISTS `#__contactdb_messages`";
+            $db->setQuery($query);
+            $db->execute();
+            
             return true;
         } catch (Exception $e) {
-            // Error no crítico
+            JFactory::getApplication()->enqueueMessage('Error eliminando tabla: ' . $e->getMessage(), 'error');
             return false;
         }
-    }
-    
-    private function getComponentId()
-    {
-        $db = JFactory::getDbo();
-        $query = $db->getQuery(true)
-            ->select('extension_id')
-            ->from('#__extensions')
-            ->where('element = ' . $db->quote('com_contactdb'))
-            ->where('type = ' . $db->quote('component'));
-        $db->setQuery($query);
-        return $db->loadResult();
     }
 }

@@ -11,8 +11,9 @@ class ModContactDBHelper
         $app = Factory::getApplication();
         
         // Si el formulario se ha enviado
-        if ($app->input->get('mod_contactdb_submit', false)) {
-            self::processForm($app->input->post);
+        if ($app->input->get('task') === 'form.save' && $app->input->get('option') === 'com_contactdb') {
+            // Dejamos que el componente se encargue del procesamiento
+            return true;
         }
         
         return true;

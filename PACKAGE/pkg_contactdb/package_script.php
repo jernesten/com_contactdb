@@ -2,9 +2,8 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\CMS\Installer\Installer;
-use Joomla\Database\DatabaseDriver;
+use Joomla\CMS\Version;
 
 class Pkg_ContactDBInstallerScript
 {
@@ -17,7 +16,6 @@ class Pkg_ContactDBInstallerScript
 
     public function uninstall($parent)
     {
-        $db = Factory::getDbo();
         echo '<p>Iniciando desinstalación del package ContactDB...</p>';
 
         $this->uninstallExtension('component', 'com_contactdb');
@@ -30,16 +28,26 @@ class Pkg_ContactDBInstallerScript
 
     public function update($parent)
     {
-        echo '<p>✓ Package ContactDB actualizado a la versión ' . $parent->get('manifest')->version . '.</p>';
+        $manifest = method_exists($parent, 'getManifest') ? $parent->getManifest() : null;
+        $version = ($manifest && isset($manifest->version)) ? (string) $manifest->version : 'desconocida';
+
+        echo '<p>✓ Package ContactDB actualizado a la versión ' . htmlspecialchars($version, ENT_QUOTES, 'UTF-8') . '.</p>';
         return true;
     }
 
     public function preflight($type, $parent)
     {
-        if (version_compare(JVERSION, '3.8.0', '<')) {
-            Factory::getApplication()->enqueueMessage('Este package requiere Joomla 3.8 o superior', 'warning');
+        $jv = new Version();
+        $current = $jv->getShortVersion();
+
+        if (version_compare($current, '4.0.0', '<')) {
+            Factory::getApplication()->enqueueMessage(
+                'Este package requiere Joomla 4.0 o superior (actual: ' . $current . ')',
+                'warning'
+            );
             return false;
         }
+
         return true;
     }
 
@@ -57,31 +65,31 @@ class Pkg_ContactDBInstallerScript
 
         try {
             $query = $db->getQuery(true)
-                ->select('extension_id')
-                ->from('#__extensions')
-                ->where('type = ' . $db->quote($type))
-                ->where('element = ' . $db->quote($element));
+                ->select($db->quoteName('extension_id'))
+                ->from($db->quoteName('#__extensions'))
+                ->where($db->quoteName('type') . ' = ' . $db->quote($type))
+                ->where($db->quoteName('element') . ' = ' . $db->quote($element));
             $db->setQuery($query);
-            $extensionId = $db->loadResult();
+            $extensionId = (int) $db->loadResult();
 
             if ($extensionId) {
                 $installer = new Installer();
                 $result = $installer->uninstall($type, $extensionId);
 
                 if ($result) {
-                    echo '<p>✓ ' . ucfirst($type) . ' ' . $element . ' desinstalado correctamente.</p>';
+                    echo '<p>✓ ' . ucfirst($type) . ' ' . htmlspecialchars($element, ENT_QUOTES, 'UTF-8') . ' desinstalado correctamente.</p>';
                     return true;
                 } else {
-                    echo '<p>✗ Error desinstalando ' . $element . '. Intentando limpieza manual...</p>';
+                    echo '<p>✗ Error desinstalando ' . htmlspecialchars($element, ENT_QUOTES, 'UTF-8') . '. Intentando limpieza manual...</p>';
                     $this->cleanExtensionResidues($type, $element);
                     return false;
                 }
             } else {
-                echo '<p>ℹ️ ' . $element . ' no encontrado en la base de datos.</p>';
+                echo '<p>ℹ️ ' . htmlspecialchars($element, ENT_QUOTES, 'UTF-8') . ' no encontrado en la base de datos.</p>';
                 return true;
             }
-        } catch (Exception $e) {
-            echo '<p>✗ Error desinstalando ' . $element . ': ' . $e->getMessage() . '</p>';
+        } catch (\Throwable $e) {
+            echo '<p>✗ Error desinstalando ' . htmlspecialchars($element, ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
             return false;
         }
     }
@@ -92,16 +100,16 @@ class Pkg_ContactDBInstallerScript
 
         try {
             $query = $db->getQuery(true)
-                ->delete('#__extensions')
-                ->where('type = ' . $db->quote($type))
-                ->where('element = ' . $db->quote($element));
+                ->delete($db->quoteName('#__extensions'))
+                ->where($db->quoteName('type') . ' = ' . $db->quote($type))
+                ->where($db->quoteName('element') . ' = ' . $db->quote($element));
             $db->setQuery($query);
             $db->execute();
 
-            echo '<p>✓ Registros residuales de ' . $element . ' eliminados.</p>';
+            echo '<p>✓ Registros residuales de ' . htmlspecialchars($element, ENT_QUOTES, 'UTF-8') . ' eliminados.</p>';
             return true;
-        } catch (Exception $e) {
-            echo '<p>✗ Error limpiando residuos de ' . $element . ': ' . $e->getMessage() . '</p>';
+        } catch (\Throwable $e) {
+            echo '<p>✗ Error limpiando residuos de ' . htmlspecialchars($element, ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
             return false;
         }
     }
@@ -112,17 +120,17 @@ class Pkg_ContactDBInstallerScript
 
         try {
             $query = $db->getQuery(true)
-                ->delete('#__menu')
-                ->where('title = ' . $db->quote('ContactDB'))
-                ->where('client_id = 1')
-                ->where('link LIKE ' . $db->quote('%option=com_contactdb%'));
+                ->delete($db->quoteName('#__menu'))
+                ->where($db->quoteName('title') . ' = ' . $db->quote('ContactDB'))
+                ->where($db->quoteName('client_id') . ' = 1')
+                ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contactdb%'));
             $db->setQuery($query);
             $db->execute();
 
             echo '<p>✓ Menú administrativo eliminado.</p>';
             return true;
-        } catch (Exception $e) {
-            echo '<p>✗ Error eliminando menú administrativo: ' . $e->getMessage() . '</p>';
+        } catch (\Throwable $e) {
+            echo '<p>✗ Error eliminando menú administrativo: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
             return false;
         }
     }

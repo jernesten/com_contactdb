@@ -2,11 +2,11 @@
 <extension type="package" version="4.0" method="upgrade">
     <name>ContactDB Package</name>
     <author>Ernesto González</author>
-    <creationDate>2025</creationDate>
+    <creationDate>2025-08-28</creationDate>
     <copyright>Derechos reservados</copyright>
     <license>GNU GPL v2 o posterior</license>
-    <authorEmail></authorEmail>
-    <authorUrl>github.com/jernesten</authorUrl>
+    <authorEmail>contacto@example.com</authorEmail>
+    <authorUrl>https://github.com/jernesten</authorUrl>
     <version>1.0.0</version>
     <description>Paquete que incluye el componente ContactDB y su módulo de formulario de contacto</description>
     
@@ -16,5 +16,5 @@
         <file type="component" id="com_contactdb">com_contactdb.zip</file>
         <file type="module" id="mod_contactdb" client="site">mod_contactdb.zip</file>
     </files>
-
 </extension>
+

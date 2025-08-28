@@ -15,7 +15,7 @@
     <files>
         <folder>site</folder>
         <folder>admin</folder>
-        <filename>contactdb.php</filename>
+        <filename>com_contactdb.php</filename>
     </files>
 
     <!-- Archivos de administración -->

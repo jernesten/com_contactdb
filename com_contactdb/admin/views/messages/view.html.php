@@ -27,7 +27,7 @@ class ContactDBViewMessages extends HtmlView
     
     protected function addToolbar()
     {
-        ToolbarHelper::title(Text::_('COM_CONTACTDB_MANAGER_MESSAGES'), '');
+        ToolbarHelper::title(Text::_('ContactDB mail manager'), '');
         
         // Botón de preferencias
         ToolbarHelper::preferences('com_contactdb');

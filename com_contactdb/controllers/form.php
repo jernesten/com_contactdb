@@ -1,55 +1,45 @@
 <?php
 defined('_JEXEC') or die;
 
-use Joomla\CMS\MVC\Controller\FormController;
+use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 
-class ContactDBControllerForm extends FormController
+class ContactDBControllerForm extends BaseController
 {
-    public function save($key = null, $urlVar = null)
+    public function save()
     {
+        // Check for request forgeries
         $this->checkToken();
 
-        $app   = Factory::getApplication();
+        $app = Factory::getApplication();
         $model = $this->getModel('Form');
-        $data  = $this->input->post->get('jform', [], 'array');
-
-        // Cargar el formulario y validar estructura
-        $form = $model->getForm($data, false);
-        if (!$form) {
-            $app->enqueueMessage($model->getError(), 'error');
-            $this->setRedirect(Route::_('index.php?option=com_contactdb&view=form', false));
-            return false;
-        }
-
+        $data = $this->input->post->get('jform', array(), 'array');
+        
         // Validar datos
-        $validData = $model->validate($form, $data);
-        if ($validData === false) {
-            foreach (array_slice($model->getErrors(), 0, 3) as $error) {
-                $msg = $error instanceof \Exception ? $error->getMessage() : $error;
-                $app->enqueueMessage($msg, 'warning');
+        $errors = $model->validateForm($data);
+        
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                $app->enqueueMessage($error, 'error');
             }
+            
             $app->setUserState('com_contactdb.form.data', $data);
             $this->setRedirect(Route::_('index.php?option=com_contactdb&view=form', false));
             return false;
         }
 
-        // Guardar datos
-        if (!$model->save($validData)) {
-            $app->setUserState('com_contactdb.form.data', $validData);
-            $app->enqueueMessage(Text::sprintf('JLIB_APPLICATION_ERROR_SAVE_FAILED', $model->getError()), 'error');
-            $this->setRedirect(Route::_('index.php?option=com_contactdb&view=form', false));
-            return false;
+        // Intentar guardar
+        if ($model->save($data)) {
+            $app->enqueueMessage(Text::_('Mensaje enviado correctamente'));
+            $app->setUserState('com_contactdb.form.data', null);
+        } else {
+            $app->enqueueMessage(Text::_('Error al enviar el mensaje'), 'error');
+            $app->setUserState('com_contactdb.form.data', $data);
         }
 
-        // Éxito: limpiar datos y mostrar mensaje
-        $app->setUserState('com_contactdb.form.data', null);
-        $app->enqueueMessage('✅ ' . Text::_('COM_CONTACTDB_SAVE_SUCCESS'), 'message');
         $this->setRedirect(Route::_('index.php?option=com_contactdb&view=form', false));
-
         return true;
     }
 }
-

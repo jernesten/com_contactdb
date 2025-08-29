@@ -1,48 +1,56 @@
 <?php
 defined('_JEXEC') or die;
 
-use Joomla\CMS\MVC\Model\FormModel;
 use Joomla\CMS\Factory;
+use Joomla\CMS\MVC\Model\BaseModel;
 
-class ContactDBModelForm extends FormModel
+class ContactDBModelForm extends BaseModel
 {
-    public function getForm($data = array(), $loadData = true)
+    public function validateForm($data)
     {
-        $form = $this->loadForm('com_contactdb.form', 'form', array('control' => 'jform', 'load_data' => $loadData));
-        
-        if (empty($form)) {
-            return false;
+        $errors = array();
+
+        // Validar nombre
+        if (empty($data['name'])) {
+            $errors[] = 'El nombre es obligatorio';
         }
-        
-        return $form;
+
+        // Validar email
+        if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'El email no es válido';
+        }
+
+        // Validar asunto
+        if (empty($data['subject'])) {
+            $errors[] = 'El asunto es obligatorio';
+        }
+
+        // Validar mensaje
+        if (empty($data['message'])) {
+            $errors[] = 'El mensaje es obligatorio';
+        }
+
+        return $errors;
     }
     
     public function save($data)
     {
         $db = Factory::getDbo();
-        $query = $db->getQuery(true);
-        
-        $columns = array('name', 'email', 'subject', 'message', 'created');
-        $values = array(
-            $db->quote($data['name']),
-            $db->quote($data['email']),
-            $db->quote($data['subject']),
-            $db->quote($data['message']),
-            $db->quote(Factory::getDate()->toSql())
-        );
-        
-        $query
-            ->insert($db->quoteName('#__contactdb_messages'))
-            ->columns($db->quoteName($columns))
-            ->values(implode(',', $values));
-            
-        $db->setQuery($query);
         
         try {
-            $db->execute();
-            return true;
+            $object = new stdClass();
+            $object->name = $data['name'];
+            $object->email = $data['email'];
+            $object->subject = $data['subject'];
+            $object->message = $data['message'];
+            $object->created = Factory::getDate()->toSql();
+            $object->published = 1;
+
+            $result = $db->insertObject('#__contactdb_messages', $object);
+            return $result;
+            
         } catch (Exception $e) {
-            Factory::getApplication()->enqueueMessage($e->getMessage(), 'error');
+            Factory::getApplication()->enqueueMessage('Error de base de datos: ' . $e->getMessage(), 'error');
             return false;
         }
     }

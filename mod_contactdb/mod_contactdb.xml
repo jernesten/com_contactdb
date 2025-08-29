@@ -6,7 +6,7 @@
     <copyright>Derechos reservados</copyright>
     <license>GNU GPL v2 o posterior</license>
     <authorUrl>github.com/jernesten</authorUrl>
-    <version>1.0.0</version>
+    <version>1.25.8</version>
     <description>Módulo para mostrar formulario de contacto que guarda en base de datos</description>
     
     <files>

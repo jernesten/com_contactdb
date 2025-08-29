@@ -8,7 +8,7 @@
     <license>GNU GPL v2 o posterior</license>
     <authorEmail>contacto@example.com</authorEmail>
     <authorUrl>https://github.com/jernesten</authorUrl>
-    <version>1.0.0</version>
+    <version>1.25.8</version>
     <description>Paquete que incluye el componente ContactDB y su módulo de formulario de contacto</description>
     
     <scriptfile>package_script.php</scriptfile>
